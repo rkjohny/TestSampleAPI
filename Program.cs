@@ -35,7 +35,7 @@ internal class Program
     public static string urlMySql = "http://localhost:5041/api/Person/my-sql/add-person";
     public static string urlRedis = "http://localhost:5041/api/Person/redis/add-person";
 
-    public static string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.~!@#$%^&*()_+=-<>,.?;:'|";
+    public static string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     public static RandomNumberGenerator Rng = RandomNumberGenerator.Create();
     public static Random Rnd = new Random();
         
