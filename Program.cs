@@ -273,7 +273,7 @@ internal class Program
     {
         GenerateData();
 
-        DbType dbType = DbType.Redis;
+        DbType dbType = DbType.InMemory;
 
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
