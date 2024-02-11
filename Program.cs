@@ -1,6 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace TestSampleAPI;
 
@@ -40,7 +41,8 @@ internal class Program
     public static Random Rnd = new Random();
         
     public static int MaxDataSet = 1000;
-    public static int MaxNumberOfRequest = 100;
+    public static int MaxNumberOfRequest = 10000;
+    
     public static Person[]? Persons;
 
     public static volatile int TotalFailed = 0;
@@ -72,7 +74,7 @@ internal class Program
                 LastName = GetNextRandomString(35),
                 Email =  Guid.NewGuid().ToString() //GetNextRandomString(70)
             };
-            Thread.Sleep(2);
+            Thread.Sleep(1);
         }
     }
 
@@ -124,9 +126,24 @@ internal class Program
                 if (response.IsSuccessStatusCode)
                 {
                     // Read and display the response body
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    // TODO: verify responseContent
-                    //Console.WriteLine("Response Body: " + responseContent);
+                    try
+                    {
+                        string responseContent = await response.Content.ReadAsStringAsync();
+                        JsonNode jsonResponse = JsonNode.Parse(responseContent)!;
+                        JsonNode resPerson = jsonResponse["person"]!;
+                        JsonNode resEmail = resPerson["email"]!;
+                        
+                        if (person.Email != resEmail.GetValue<string>())
+                        {
+                            Console.WriteLine("Response did not match with input. Input[" + person.Email + " response[" + resEmail.GetValue<string>());
+                            Interlocked.Increment(ref TotalFailed);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Failed to parse response. Error: " + ex.Message);
+                        Interlocked.Increment(ref TotalFailed);
+                    }
                 }
                 else
                 {
@@ -142,17 +159,39 @@ internal class Program
         }
     }
 
-    public static async Task ExecuteTestAsync(Request request)
+    public static async Task ExecuteTestAsync(Request request, int num)
     {
-        var tasks = new Task[MaxNumberOfRequest];
-            
-        for (var i = 0; i < MaxNumberOfRequest; i++)
+        var tasks = new Task[num];
+
+        for (var i = 0; i < num; i++)
         {
             tasks[i] = Task.Run(() => SendRequest(request));
-            Thread.Sleep(10);
         }
-            
         await Task.WhenAll(tasks);
+    }
+
+    public static async Task ExecuteTest(Request request)
+    {
+        //int requestChunkSize = MaxNumberOfRequest / 1000 + (MaxNumberOfRequest % 1000 > 0 ? 1 : 0);
+        
+        int n = MaxNumberOfRequest;
+        int requestChunkSize = 100; // sending 100 request at a time before taking a 5 ms sleep
+
+        // sending all request splitting in at most 1000 iteration
+        while (n > 0)
+        {
+            if (n >= requestChunkSize)
+            {
+                await ExecuteTestAsync(request, requestChunkSize);
+                n -= requestChunkSize;
+            }
+            else
+            {
+                await ExecuteTestAsync(request, n);
+                n = 0;
+            }
+            Thread.Sleep(2);
+        }
     }
 
     public static async Task Execute(DbType dbType)
@@ -201,7 +240,7 @@ internal class Program
         }
 
         request!.StartTime = DateTime.Now;
-        await ExecuteTestAsync(request!);
+        await ExecuteTest(request);
         request.EndTime = DateTime.Now;
             
         Print(request);
@@ -229,12 +268,12 @@ internal class Program
         Console.WriteLine("");
         Console.WriteLine("*************************************************");
     }
-        
+
     static async Task Main(string[] args)
     {
         GenerateData();
 
-        DbType dbType = DbType.InMemory;
+        DbType dbType = DbType.Redis;
 
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
