@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.ComponentModel;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -196,48 +197,16 @@ internal class Program
 
     public static async Task Execute(DbType dbType)
     {
-        Request? request = null;
         TotalFailed = 0;
-            
-        switch (dbType)
+
+        var request = dbType switch
         {
-            case DbType.PgSql:
-            {
-                request = new Request
-                {
-                    TestName = "PgSql Test:",
-                    Url = urlPgSql,
-                };
-                break;
-            }
-            case DbType.MySql:
-            {
-                request = new Request
-                {
-                    TestName = "MySql Test:",
-                    Url = urlMySql,
-                };
-                break;
-            }
-            case DbType.InMemory:
-            {
-                request = new Request
-                {
-                    TestName = "In Memory Test:",
-                    Url = urlInMemory
-                };
-                break;
-            }
-            case DbType.Redis:
-            {
-                request = new Request
-                {
-                    TestName = "Redis Test:",
-                    Url = urlRedis
-                };
-                break;
-            }
-        }
+            DbType.PgSql => new Request { TestName = "PgSql Test:", Url = urlPgSql, },
+            DbType.MySql => new Request { TestName = "MySql Test:", Url = urlMySql, },
+            DbType.InMemory => new Request { TestName = "In Memory Test:", Url = urlInMemory },
+            DbType.Redis => new Request { TestName = "Redis Test:", Url = urlRedis },
+            _ => throw new InvalidEnumArgumentException("Invalid data type")
+        };
 
         request!.StartTime = DateTime.Now;
         await ExecuteTest(request);
@@ -273,7 +242,7 @@ internal class Program
     {
         GenerateData();
 
-        DbType dbType = DbType.PgSql;
+        DbType dbType = DbType.InMemory;
 
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
