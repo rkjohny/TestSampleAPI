@@ -32,14 +32,14 @@ internal class Program
         public DateTime? EndTime { get; set; }
     }
 
-    public static string urlInMemory = "http://localhost:5041/api/Person/in-memory/add-person";
-    public static string urlPgSql = "http://localhost:5041/api/Person/pg-sql/add-person";
-    public static string urlMySql = "http://localhost:5041/api/Person/my-sql/add-person";
-    public static string urlRedis = "http://localhost:5041/api/Person/redis/add-person";
+    public static string UrlInMemory = "http://localhost:5041/api/Person/in-memory/add-person";
+    public static string UrlPgSql = "http://localhost:5041/api/Person/pg-sql/add-person";
+    public static string UrlMySql = "http://localhost:5041/api/Person/my-sql/add-person";
+    public static string UrlRedis = "http://localhost:5041/api/Person/redis/add-person";
 
     public static string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     public static RandomNumberGenerator Rng = RandomNumberGenerator.Create();
-    public static Random Rnd = new Random();
+    public static Random Rnd = new();
         
     public static int MaxDataSet = 5000;
     public static int MaxNumberOfRequest = 10000;
@@ -175,8 +175,8 @@ internal class Program
     {
         //int requestChunkSize = MaxNumberOfRequest / 1000 + (MaxNumberOfRequest % 1000 > 0 ? 1 : 0);
         
-        int n = MaxNumberOfRequest;
-        int requestChunkSize = 100; // sending 100 request at a time before taking a sleep
+        var n = MaxNumberOfRequest;
+        const int requestChunkSize = 100; // sending 100 request at a time before taking a sleep
 
         // sending all request splitting in at most 1000 iteration
         while (n > 0)
@@ -201,14 +201,14 @@ internal class Program
 
         var request = dbType switch
         {
-            DbType.PgSql => new Request { TestName = "PgSql Test:", Url = urlPgSql, },
-            DbType.MySql => new Request { TestName = "MySql Test:", Url = urlMySql, },
-            DbType.InMemory => new Request { TestName = "In Memory Test:", Url = urlInMemory },
-            DbType.Redis => new Request { TestName = "Redis Test:", Url = urlRedis },
+            DbType.PgSql => new Request { TestName = "PgSql Test:", Url = UrlPgSql, },
+            DbType.MySql => new Request { TestName = "MySql Test:", Url = UrlMySql, },
+            DbType.InMemory => new Request { TestName = "In Memory Test:", Url = UrlInMemory },
+            DbType.Redis => new Request { TestName = "Redis Test:", Url = UrlRedis },
             _ => throw new InvalidEnumArgumentException("Invalid data type")
         };
 
-        request!.StartTime = DateTime.Now;
+        request.StartTime = DateTime.Now;
         await ExecuteTest(request);
         request.EndTime = DateTime.Now;
             
