@@ -242,7 +242,7 @@ internal class Program
     {
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
-        Console.WriteLine("Generating " + MaxDataSet + " data set:");
+        Console.WriteLine("Generating test data set of size: " + MaxDataSet);
         Console.WriteLine("");
 
         GenerateData();
