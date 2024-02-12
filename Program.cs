@@ -40,7 +40,7 @@ internal class Program
     public static RandomNumberGenerator Rng = RandomNumberGenerator.Create();
     public static Random Rnd = new Random();
         
-    public static int MaxDataSet = 1000;
+    public static int MaxDataSet = 5000;
     public static int MaxNumberOfRequest = 10000;
     
     public static Person[]? Persons;
@@ -269,11 +269,11 @@ internal class Program
         Console.WriteLine("*************************************************");
     }
 
-    static async Task Main(string[] args)
+    private static async Task Main()
     {
         GenerateData();
 
-        DbType dbType = DbType.MySql;
+        DbType dbType = DbType.InMemory;
 
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
