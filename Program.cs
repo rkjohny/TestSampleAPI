@@ -175,7 +175,7 @@ internal class Program
         //int requestChunkSize = MaxNumberOfRequest / 1000 + (MaxNumberOfRequest % 1000 > 0 ? 1 : 0);
         
         int n = MaxNumberOfRequest;
-        int requestChunkSize = 100; // sending 100 request at a time before taking a 5 ms sleep
+        int requestChunkSize = 100; // sending 100 request at a time before taking a sleep
 
         // sending all request splitting in at most 1000 iteration
         while (n > 0)
@@ -273,7 +273,7 @@ internal class Program
     {
         GenerateData();
 
-        DbType dbType = DbType.InMemory;
+        DbType dbType = DbType.MySql;
 
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
