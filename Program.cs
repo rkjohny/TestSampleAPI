@@ -273,7 +273,7 @@ internal class Program
     {
         GenerateData();
 
-        DbType dbType = DbType.InMemory;
+        DbType dbType = DbType.PgSql;
 
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
