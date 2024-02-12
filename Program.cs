@@ -240,6 +240,11 @@ internal class Program
 
     private static async Task Main()
     {
+        Console.WriteLine("*************************************************");
+        Console.WriteLine("");
+        Console.WriteLine("Generating " + MaxDataSet + " data set:");
+        Console.WriteLine("");
+
         GenerateData();
 
         DbType dbType = DbType.InMemory;
