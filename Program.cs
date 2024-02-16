@@ -178,7 +178,6 @@ internal class Program
         var n = MaxNumberOfRequest;
         const int requestChunkSize = 100; // sending 100 request at a time before taking a sleep
 
-        // sending all request splitting in at most 1000 iteration
         while (n > 0)
         {
             if (n >= requestChunkSize)
@@ -191,7 +190,7 @@ internal class Program
                 await ExecuteTestAsync(request, n);
                 n = 0;
             }
-            Thread.Sleep(2);
+            Thread.Sleep(3);
         }
     }
 
