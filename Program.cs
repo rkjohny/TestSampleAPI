@@ -109,10 +109,10 @@ internal class Program
         {
             // pick a random person
             var person = Persons[GetNextRandomInt(Persons.Length)];
-            string requestBody = JsonSerializer.Serialize(person);
+            var requestBody = JsonSerializer.Serialize(person);
 
             // Create the request content with JSON data
-            StringContent content = new StringContent(requestBody, Encoding.UTF8, "application/json");
+            var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
 
             // Add headers if needed
             //client.DefaultRequestHeaders.Add("Authorization", "Bearer YourAccessToken");
@@ -121,7 +121,7 @@ internal class Program
             try
             {
                 // Send the POST request
-                HttpResponseMessage response = await client.PostAsync(request.Url, content);
+                var response = await client.PostAsync(request.Url, content);
 
                 // Check if the request was successful
                 if (response.IsSuccessStatusCode)
@@ -129,10 +129,10 @@ internal class Program
                     // Read and display the response body
                     try
                     {
-                        string responseContent = await response.Content.ReadAsStringAsync();
-                        JsonNode jsonResponse = JsonNode.Parse(responseContent)!;
-                        JsonNode resPerson = jsonResponse["person"]!;
-                        JsonNode resEmail = resPerson["email"]!;
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        var jsonResponse = JsonNode.Parse(responseContent)!;
+                        var resPerson = jsonResponse["person"]!;
+                        var resEmail = resPerson["email"]!;
                         
                         if (person.Email != resEmail.GetValue<string>())
                         {
@@ -247,7 +247,7 @@ internal class Program
 
         GenerateData();
 
-        DbType dbType = DbType.InMemory;
+        const DbType dbType = DbType.InMemory;
 
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
