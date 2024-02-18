@@ -246,7 +246,7 @@ internal class Program
 
         GenerateData();
 
-        const DbType dbType = DbType.Redis;
+        const DbType dbType = DbType.InMemory;
 
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
