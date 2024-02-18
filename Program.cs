@@ -16,7 +16,7 @@ internal class Program
         Redis
     }
 
-    public class Person
+    private class Person
     {
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
@@ -25,28 +25,28 @@ internal class Program
 
     public class Request
     {
-        public required string TestName { get; set; }
-        public required string Url { get; set; }
+        public required string TestName { get; init; }
+        public required string Url { get; init; }
 
         public DateTime? StartTime { get; set; }
         public DateTime? EndTime { get; set; }
     }
 
-    public static string UrlInMemory = "http://localhost:5041/api/Person/in-memory/add-person";
-    public static string UrlPgSql = "http://localhost:5041/api/Person/pg-sql/add-person";
-    public static string UrlMySql = "http://localhost:5041/api/Person/my-sql/add-person";
-    public static string UrlRedis = "http://localhost:5041/api/Person/redis/add-person";
+    private const string UrlInMemory = "http://localhost:5041/api/Person/in-memory/add-person";
+    private const string UrlPgSql = "http://localhost:5041/api/Person/pg-sql/add-person";
+    private const string UrlMySql = "http://localhost:5041/api/Person/my-sql/add-person";
+    private const string UrlRedis = "http://localhost:5041/api/Person/redis/add-person";
 
-    public static string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    private const string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     public static RandomNumberGenerator Rng = RandomNumberGenerator.Create();
-    public static Random Rnd = new();
+    private static readonly Random Rnd = new();
 
-    public static int MaxDataSet = 5000;
-    public static int MaxNumberOfRequest = 10000;
-    
-    public static Person[]? Persons;
+    private const int MaxDataSet = 5000;
+    private const int MaxNumberOfRequest = 10000;
 
-    public static volatile int TotalFailed = 0;
+    private static Person[]? _persons;
+
+    private static volatile int _totalFailed = 0;
 
     public static string ShuffleString(string stringToShuffle)
     {
@@ -64,12 +64,12 @@ internal class Program
         return shuffled;
     }
 
-    public static void GenerateData()
+    private static void GenerateData()
     {
-        Persons = new Person[MaxDataSet];
-        for (var i = 0; i < Persons.Length; i++)
+        _persons = new Person[MaxDataSet];
+        for (var i = 0; i < _persons.Length; i++)
         {
-            Persons[i] = new Person
+            _persons[i] = new Person
             {
                 FirstName = GetNextRandomString(35),
                 LastName = GetNextRandomString(35),
@@ -79,14 +79,14 @@ internal class Program
         }
     }
 
-    public static void Print(Request request)
+    private static void Print(Request request)
     {
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
 
         Console.WriteLine($"Test Name: {request.TestName}");
         Console.WriteLine($"URL: {request.Url}");
-        Console.WriteLine($"Total Failed: {TotalFailed}");
+        Console.WriteLine($"Total Failed: {_totalFailed}");
 
         // Calculate the time difference
         if (request is { EndTime: not null, StartTime: not null })
@@ -100,16 +100,16 @@ internal class Program
         Console.WriteLine("");
         Console.WriteLine("*************************************************");
     }
-    
-    public static int GetNextRandomInt(int upperLimit)
+
+    private static int GetNextRandomInt(int upperLimit)
     {
         //var data = new byte[1];
         //Rng.GetBytes(data);
         //return data[0] % upperLimit;
         return Rnd.Next(upperLimit);
     }
-        
-    public static string GetNextRandomString(int length)
+
+    private static string GetNextRandomString(int length)
     {
         StringBuilder result = new();
             
@@ -120,17 +120,17 @@ internal class Program
         return result.ToString();
     }
 
-    public static async Task SendRequest(Request request)
+    private static async Task SendRequest(Request request)
     {
         // Create HttpClient instance
         using var client = new HttpClient();
         client.Timeout = TimeSpan.FromSeconds(30000); // 30 seconds
             
         // Prepare the request body
-        if (Persons != null)
+        if (_persons != null)
         {
             // pick a random person
-            var person = Persons[GetNextRandomInt(Persons.Length)];
+            var person = _persons[GetNextRandomInt(_persons.Length)];
             var requestBody = JsonSerializer.Serialize(person);
 
             // Create the request content with JSON data
@@ -159,30 +159,30 @@ internal class Program
                         if (person.Email != resEmail.GetValue<string>())
                         {
                             Console.WriteLine("Response did not match with input. Input[" + person.Email + " response[" + resEmail.GetValue<string>());
-                            Interlocked.Increment(ref TotalFailed);
+                            Interlocked.Increment(ref _totalFailed);
                         }
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine("Failed to parse response. Error: " + ex.Message);
-                        Interlocked.Increment(ref TotalFailed);
+                        Interlocked.Increment(ref _totalFailed);
                     }
                 }
                 else
                 {
                     Console.WriteLine("Error: " + response);
-                    Interlocked.Increment(ref TotalFailed);
+                    Interlocked.Increment(ref _totalFailed);
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine("Error: " + e.Message);
-                Interlocked.Increment(ref TotalFailed);
+                Interlocked.Increment(ref _totalFailed);
             }
         }
     }
 
-    public static async Task ExecuteTestAsync(Request request, int num)
+    private static async Task ExecuteTestAsync(Request request, int num)
     {
         var tasks = new Task[num];
 
@@ -193,7 +193,7 @@ internal class Program
         await Task.WhenAll(tasks);
     }
 
-    public static async Task ExecuteTest(Request request)
+    private static async Task ExecuteTest(Request request)
     {
         //int requestChunkSize = MaxNumberOfRequest / 1000 + (MaxNumberOfRequest % 1000 > 0 ? 1 : 0);
         
@@ -216,9 +216,9 @@ internal class Program
         }
     }
 
-    public static async Task Execute(DbType dbType)
+    private static async Task Execute(DbType dbType)
     {
-        TotalFailed = 0;
+        _totalFailed = 0;
 
         var request = dbType switch
         {
@@ -246,7 +246,7 @@ internal class Program
 
         GenerateData();
 
-        const DbType dbType = DbType.InMemory;
+        const DbType dbType = DbType.Redis;
 
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
