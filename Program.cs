@@ -38,7 +38,7 @@ internal class Program
     private const string UrlRedis = "http://localhost:5041/api/Person/redis/add-person";
 
     private const string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    public static RandomNumberGenerator Rng = RandomNumberGenerator.Create();
+    public static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
     private static readonly Random Rnd = new();
 
     private const int MaxDataSet = 5000;
