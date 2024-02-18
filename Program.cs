@@ -40,7 +40,7 @@ internal class Program
     public static string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     public static RandomNumberGenerator Rng = RandomNumberGenerator.Create();
     public static Random Rnd = new();
-        
+
     public static int MaxDataSet = 5000;
     public static int MaxNumberOfRequest = 10000;
     
@@ -79,6 +79,28 @@ internal class Program
         }
     }
 
+    public static void Print(Request request)
+    {
+        Console.WriteLine("*************************************************");
+        Console.WriteLine("");
+
+        Console.WriteLine($"Test Name: {request.TestName}");
+        Console.WriteLine($"URL: {request.Url}");
+        Console.WriteLine($"Total Failed: {TotalFailed}");
+
+        // Calculate the time difference
+        if (request is { EndTime: not null, StartTime: not null })
+        {
+            //var timeDifference = (TimeSpan)(request.EndTime - request.StartTime)!;
+            var timeDifference = request.EndTime.Value.Subtract(request.StartTime.Value);
+            var differenceInSeconds = (int)timeDifference.TotalSeconds;
+            Console.WriteLine($"Time taken in seconds: {differenceInSeconds}");
+        }
+
+        Console.WriteLine("");
+        Console.WriteLine("*************************************************");
+    }
+    
     public static int GetNextRandomInt(int upperLimit)
     {
         //var data = new byte[1];
@@ -190,7 +212,7 @@ internal class Program
                 await ExecuteTestAsync(request, n);
                 n = 0;
             }
-            Thread.Sleep(3);
+            Thread.Sleep(5);
         }
     }
 
@@ -215,28 +237,6 @@ internal class Program
     }
 
 
-    public static void Print(Request request)
-    {
-        Console.WriteLine("*************************************************");
-        Console.WriteLine("");
-
-        Console.WriteLine($"Test Name: {request.TestName}");
-        Console.WriteLine($"URL: {request.Url}");
-        Console.WriteLine($"Total Failed: {TotalFailed}");
-
-        // Calculate the time difference
-        if (request is { EndTime: not null, StartTime: not null })
-        {
-            //var timeDifference = (TimeSpan)(request.EndTime - request.StartTime)!;
-            var timeDifference = request.EndTime.Value.Subtract(request.StartTime.Value);
-            var differenceInSeconds = (int)timeDifference.TotalSeconds;
-            Console.WriteLine($"Time taken in seconds: {differenceInSeconds}");
-        }
-
-        Console.WriteLine("");
-        Console.WriteLine("*************************************************");
-    }
-
     private static async Task Main()
     {
         Console.WriteLine("*************************************************");
@@ -248,6 +248,10 @@ internal class Program
 
         const DbType dbType = DbType.InMemory;
 
+        Console.WriteLine("*************************************************");
+        Console.WriteLine("");
+        Console.WriteLine("Data Generated");
+        Console.WriteLine("");
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
         Console.WriteLine("Starting execution of " + MaxNumberOfRequest + " requests: " + dbType);
