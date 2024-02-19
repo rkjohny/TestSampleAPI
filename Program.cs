@@ -211,8 +211,10 @@ internal class Program
                 await ExecuteTestAsync(request, n);
                 n = 0;
             }
+            Console.Write(".");
             Thread.Sleep(5);
         }
+        Console.WriteLine("");
     }
 
     private static async Task Execute(DbType dbType)
