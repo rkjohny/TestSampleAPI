@@ -48,6 +48,9 @@ internal class Program
 
     private static volatile int _totalFailed = 0;
 
+    // Create HttpClient instance
+    static readonly HttpClient Client = new ();
+    
     public static string ShuffleString(string stringToShuffle)
     {
         string shuffled;
@@ -75,7 +78,7 @@ internal class Program
                 LastName = GetNextRandomString(35),
                 Email =  Guid.NewGuid().ToString() //GetNextRandomString(70)
             };
-            Thread.Sleep(1);
+            //Thread.Sleep(1);
         }
     }
 
@@ -122,10 +125,6 @@ internal class Program
 
     private static async Task SendRequest(Request request)
     {
-        // Create HttpClient instance
-        using var client = new HttpClient();
-        client.Timeout = TimeSpan.FromSeconds(30000); // 30 seconds
-            
         // Prepare the request body
         if (_persons != null)
         {
@@ -143,7 +142,7 @@ internal class Program
             try
             {
                 // Send the POST request
-                var response = await client.PostAsync(request.Url, content);
+                var response = await Client.PostAsync(request.Url, content);
 
                 // Check if the request was successful
                 if (response.IsSuccessStatusCode)
@@ -239,24 +238,34 @@ internal class Program
 
     private static async Task Main()
     {
-        Console.WriteLine("*************************************************");
-        Console.WriteLine("");
-        Console.WriteLine("Generating test data set of size: " + MaxDataSet);
-        Console.WriteLine("");
+        try
+        {
+            Client.Timeout = TimeSpan.FromSeconds(30000); // 30 seconds
 
-        GenerateData();
+            Console.WriteLine("*************************************************");
+            Console.WriteLine("");
+            Console.WriteLine("Generating test data set of size: " + MaxDataSet);
+            Console.WriteLine("");
 
-        const DbType dbType = DbType.InMemory;
+            GenerateData();
 
-        Console.WriteLine("*************************************************");
-        Console.WriteLine("");
-        Console.WriteLine("Data Generated");
-        Console.WriteLine("");
-        Console.WriteLine("*************************************************");
-        Console.WriteLine("");
-        Console.WriteLine("Starting execution of " + MaxNumberOfRequest + " requests: " + dbType);
-        Console.WriteLine("");
-            
-        await Execute(dbType);
+            const DbType dbType = DbType.PgSql;
+
+            Console.WriteLine("*************************************************");
+            Console.WriteLine("");
+            Console.WriteLine("Data Generated");
+            Console.WriteLine("");
+            Console.WriteLine("*************************************************");
+            Console.WriteLine("");
+            Console.WriteLine("Starting execution of " + MaxNumberOfRequest + " requests: " + dbType);
+            Console.WriteLine("");
+
+            await Execute(dbType);
+        }
+        finally
+        {
+            Console.WriteLine("Disposing http client");
+            Client.Dispose();
+        }
     }
 }
