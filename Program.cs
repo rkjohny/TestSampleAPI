@@ -196,7 +196,7 @@ internal class Program
         //int requestChunkSize = MaxNumberOfRequest / 1000 + (MaxNumberOfRequest % 1000 > 0 ? 1 : 0);
         
         var n = MaxNumberOfRequest;
-        const int requestChunkSize = 100; // sending 100 request at a time before taking a sleep
+        const int requestChunkSize = 1000; // sending 100 request at a time before taking a sleep
 
         while (n > 0)
         {
@@ -248,7 +248,7 @@ internal class Program
 
         GenerateData();
 
-        const DbType dbType = DbType.PgSql;
+        const DbType dbType = DbType.InMemory;
 
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
