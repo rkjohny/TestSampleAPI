@@ -32,10 +32,10 @@ internal class Program
         public DateTime? EndTime { get; set; }
     }
 
-    private const string UrlInMemory = "http://localhost:5041/api/Person/in-memory/add-person";
-    private const string UrlPgSql = "http://localhost:5041/api/Person/pg-sql/add-person";
-    private const string UrlMySql = "http://localhost:5041/api/Person/my-sql/add-person";
-    private const string UrlRedis = "http://localhost:5041/api/Person/redis/add-person";
+    private const string UrlInMemory = "http://localhost:5041/api/v1/Person/in-memory/add-person";
+    private const string UrlPgSql = "http://localhost:5041/api/v1/Person/pg-sql/add-person";
+    private const string UrlMySql = "http://localhost:5041/api/v1/Person/my-sql/add-person";
+    private const string UrlRedis = "http://localhost:5041/api/v1/Person/redis/add-person";
 
     private const string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     public static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
@@ -78,7 +78,6 @@ internal class Program
                 LastName = GetNextRandomString(35),
                 Email =  Guid.NewGuid().ToString() //GetNextRandomString(70)
             };
-            //Thread.Sleep(1);
         }
     }
 
@@ -212,7 +211,7 @@ internal class Program
                 n = 0;
             }
             Console.Write(".");
-            Thread.Sleep(5);
+            Thread.Sleep(2);
         }
         Console.WriteLine("");
     }
@@ -240,34 +239,29 @@ internal class Program
 
     private static async Task Main()
     {
-        try
-        {
-            Client.Timeout = TimeSpan.FromSeconds(30000); // 30 seconds
+        Client.Timeout = TimeSpan.FromSeconds(30000); // 30 seconds
 
-            Console.WriteLine("*************************************************");
-            Console.WriteLine("");
-            Console.WriteLine("Generating test data set of size: " + MaxDataSet);
-            Console.WriteLine("");
+        Console.WriteLine("*************************************************");
+        Console.WriteLine("");
+        Console.WriteLine("Generating test data set of size: " + MaxDataSet);
+        Console.WriteLine("");
 
-            GenerateData();
+        GenerateData();
 
-            const DbType dbType = DbType.PgSql;
+        const DbType dbType = DbType.PgSql;
 
-            Console.WriteLine("*************************************************");
-            Console.WriteLine("");
-            Console.WriteLine("Data Generated");
-            Console.WriteLine("");
-            Console.WriteLine("*************************************************");
-            Console.WriteLine("");
-            Console.WriteLine("Starting execution of " + MaxNumberOfRequest + " requests: " + dbType);
-            Console.WriteLine("");
+        Console.WriteLine("*************************************************");
+        Console.WriteLine("");
+        Console.WriteLine("Data Generated");
+        Console.WriteLine("");
+        Console.WriteLine("*************************************************");
+        Console.WriteLine("");
+        Console.WriteLine("Starting execution of " + MaxNumberOfRequest + " requests: " + dbType);
+        Console.WriteLine("");
 
-            await Execute(dbType);
-        }
-        finally
-        {
-            Console.WriteLine("Disposing http client");
-            Client.Dispose();
-        }
+        await Execute(dbType);
+        
+        Console.WriteLine("Press Enter to exit");
+        Console.ReadLine();
     }
 }
