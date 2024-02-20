@@ -43,7 +43,8 @@ internal class Program
     private static readonly Random Rnd = new();
 
     private const int MaxDataSet = 5000;
-    private const int MaxNumberOfRequest = 10000;
+    private const int TotalNumberOfRequest = 10000;
+    private const int NumberOfRequestAtATime = 1000;
 
     private static Person[]? _persons;
 
@@ -194,17 +195,15 @@ internal class Program
 
     private static async Task ExecuteTest(Request request)
     {
-        //int requestChunkSize = MaxNumberOfRequest / 1000 + (MaxNumberOfRequest % 1000 > 0 ? 1 : 0);
-        var n = MaxNumberOfRequest;
-        const int requestChunkSize = 1000; // sending 100 request at a time before taking a sleep
+        var n = TotalNumberOfRequest;
         _totalFailed = 0;
 
         while (n > 0)
         {
-            if (n >= requestChunkSize)
+            if (n >= NumberOfRequestAtATime)
             {
-                await ExecuteTestAsync(request, requestChunkSize);
-                n -= requestChunkSize;
+                await ExecuteTestAsync(request, NumberOfRequestAtATime);
+                n -= NumberOfRequestAtATime;
             }
             else
             {
@@ -250,7 +249,7 @@ internal class Program
         Console.WriteLine("");
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
-        Console.WriteLine("Starting execution of " + MaxNumberOfRequest + " requests: " + dbType);
+        Console.WriteLine("Starting execution of " + TotalNumberOfRequest + " requests: " + dbType);
         Console.WriteLine("");
 
         var request = GetRequest(dbType);
