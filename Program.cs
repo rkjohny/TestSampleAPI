@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -194,9 +195,9 @@ internal class Program
     private static async Task ExecuteTest(Request request)
     {
         //int requestChunkSize = MaxNumberOfRequest / 1000 + (MaxNumberOfRequest % 1000 > 0 ? 1 : 0);
-        
         var n = MaxNumberOfRequest;
         const int requestChunkSize = 1000; // sending 100 request at a time before taking a sleep
+        _totalFailed = 0;
 
         while (n > 0)
         {
@@ -213,13 +214,12 @@ internal class Program
             Console.Write(".");
             Thread.Sleep(2);
         }
-        Console.WriteLine("");
+        Console.WriteLine();
+        Console.WriteLine("All request have been sent successfully");
     }
 
-    private static async Task Execute(DbType dbType)
+    public static Request GetRequest(DbType dbType)
     {
-        _totalFailed = 0;
-
         var request = dbType switch
         {
             DbType.PgSql => new Request { TestName = "PgSql Test:", Url = UrlPgSql, },
@@ -228,15 +228,9 @@ internal class Program
             DbType.Redis => new Request { TestName = "Redis Test:", Url = UrlRedis },
             _ => throw new InvalidEnumArgumentException("Invalid data type")
         };
-
-        request.StartTime = DateTime.Now;
-        await ExecuteTest(request);
-        request.EndTime = DateTime.Now;
-            
-        Print(request);
+        return request;
     }
-
-
+    
     private static async Task Main()
     {
         Client.Timeout = TimeSpan.FromSeconds(30000); // 30 seconds
@@ -248,7 +242,7 @@ internal class Program
 
         GenerateData();
 
-        const DbType dbType = DbType.InMemory;
+        const DbType dbType = DbType.MySql;
 
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
@@ -259,9 +253,12 @@ internal class Program
         Console.WriteLine("Starting execution of " + MaxNumberOfRequest + " requests: " + dbType);
         Console.WriteLine("");
 
-        await Execute(dbType);
+        var request = GetRequest(dbType);
         
-        Console.WriteLine("Press Enter to exit");
-        Console.ReadLine();
+        request.StartTime = DateTime.Now;
+        await ExecuteTest(request);
+        request.EndTime = DateTime.Now;
+        
+        Print(request);
     }
 }
