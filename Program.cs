@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -42,7 +41,7 @@ internal class Program
     public static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
     private static readonly Random Rnd = new();
 
-    private const int MaxDataSet = 5000;
+    private const int TotalNumberOfData = 10000;
     private const int TotalNumberOfRequest = 10000;
     private const int NumberOfRequestAtATime = 1000;
 
@@ -71,14 +70,14 @@ internal class Program
 
     private static void GenerateData()
     {
-        _persons = new Person[MaxDataSet];
+        _persons = new Person[TotalNumberOfData];
         for (var i = 0; i < _persons.Length; i++)
         {
             _persons[i] = new Person
             {
                 FirstName = GetNextRandomString(35),
                 LastName = GetNextRandomString(35),
-                Email =  Guid.NewGuid().ToString() //GetNextRandomString(70)
+                Email = ShuffleString(GetNextRandomString(70)) //GetNextRandomString(70)
             };
         }
     }
@@ -107,10 +106,10 @@ internal class Program
 
     private static int GetNextRandomInt(int upperLimit)
     {
-        //var data = new byte[1];
-        //Rng.GetBytes(data);
-        //return data[0] % upperLimit;
-        return Rnd.Next(upperLimit);
+        var data = new byte[1];
+        Rng.GetBytes(data);
+        return data[0] % upperLimit;
+        //return Rnd.Next(upperLimit);
     }
 
     private static string GetNextRandomString(int length)
@@ -236,12 +235,12 @@ internal class Program
 
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
-        Console.WriteLine("Generating test data set of size: " + MaxDataSet);
+        Console.WriteLine("Generating test data set of size: " + TotalNumberOfData);
         Console.WriteLine("");
 
         GenerateData();
 
-        const DbType dbType = DbType.MySql;
+        const DbType dbType = DbType.InMemory;
 
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
