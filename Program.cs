@@ -28,6 +28,8 @@ internal class Program
         public required string TestName { get; init; }
         public required string Url { get; init; }
 
+        public DbType DbType { get; init; }
+        
         public DateTime? StartTime { get; set; }
         public DateTime? EndTime { get; set; }
     }
@@ -135,10 +137,6 @@ internal class Program
             // Create the request content with JSON data
             var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
 
-            // Add headers if needed
-            //client.DefaultRequestHeaders.Add("Authorization", "Bearer YourAccessToken");
-            //client.DefaultRequestHeaders.Add("User-Agent", "YourUserAgent");
-
             try
             {
                 // Send the POST request
@@ -209,21 +207,19 @@ internal class Program
                 await ExecuteTestAsync(request, n);
                 n = 0;
             }
-            Console.Write(".");
             Thread.Sleep(2);
         }
-        Console.WriteLine();
-        Console.WriteLine("All request have been sent successfully");
+        Console.WriteLine("All requests have been sent.");
     }
 
     public static Request GetRequest(DbType dbType)
     {
         var request = dbType switch
         {
-            DbType.PgSql => new Request { TestName = "PgSql Test:", Url = UrlPgSql, },
-            DbType.MySql => new Request { TestName = "MySql Test:", Url = UrlMySql, },
-            DbType.InMemory => new Request { TestName = "In Memory Test:", Url = UrlInMemory },
-            DbType.Redis => new Request { TestName = "Redis Test:", Url = UrlRedis },
+            DbType.PgSql => new Request { TestName = "PgSql Test:", Url = UrlPgSql, DbType = dbType },
+            DbType.MySql => new Request { TestName = "MySql Test:", Url = UrlMySql, DbType = dbType },
+            DbType.InMemory => new Request { TestName = "In Memory Test:", Url = UrlInMemory , DbType = dbType },
+            DbType.Redis => new Request { TestName = "Redis Test:", Url = UrlRedis , DbType = dbType },
             _ => throw new InvalidEnumArgumentException("Invalid data type")
         };
         return request;
@@ -240,7 +236,7 @@ internal class Program
 
         GenerateData();
 
-        const DbType dbType = DbType.InMemory;
+        const DbType dbType = DbType.MySql;
 
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
