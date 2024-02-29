@@ -45,8 +45,9 @@ internal class Program
 
     private const int TotalNumberOfData = 10000;
     private const int TotalNumberOfRequest = 10000;
-    private const int NumberOfRequestAtATime = 1000;
-
+    private const int MaxWorkerThread = TotalNumberOfRequest + 1000;
+    private const int MinWorkerThread = 100;
+    
     private static Person[]? _persons;
 
     private static volatile int _totalFailed = 0;
@@ -179,37 +180,26 @@ internal class Program
         }
     }
 
-    private static async Task ExecuteTestAsync(Request request, int num)
+    private static async Task ExecuteTestAsync(Request request)
     {
-        var tasks = new Task[num];
+        var tasks = new Task[TotalNumberOfRequest];
 
-        for (var i = 0; i < num; i++)
+        DateTime start = DateTime.Now;
+        
+        for (var i = 0; i < TotalNumberOfRequest; i++)
         {
+            Console.Write(".");
             tasks[i] = Task.Run(() => SendRequest(request));
         }
+        
+        DateTime end = DateTime.Now;
+        var timeDifference = end.Subtract(start);
+        var differenceInSeconds = (int)timeDifference.TotalMilliseconds;
+        
+        Console.WriteLine();
+        Console.WriteLine($"{TotalNumberOfRequest} requests have been sent in {differenceInSeconds} milliseconds, waiting for the completion of all requests:");
+        
         await Task.WhenAll(tasks);
-    }
-
-    private static async Task ExecuteTest(Request request)
-    {
-        var n = TotalNumberOfRequest;
-        _totalFailed = 0;
-
-        while (n > 0)
-        {
-            if (n >= NumberOfRequestAtATime)
-            {
-                await ExecuteTestAsync(request, NumberOfRequestAtATime);
-                n -= NumberOfRequestAtATime;
-            }
-            else
-            {
-                await ExecuteTestAsync(request, n);
-                n = 0;
-            }
-            Thread.Sleep(2);
-        }
-        Console.WriteLine("All requests have been sent.");
     }
 
     public static Request GetRequest(DbType dbType)
@@ -229,6 +219,9 @@ internal class Program
     {
         Client.Timeout = TimeSpan.FromSeconds(30000); // 30 seconds
 
+        ThreadPool.SetMinThreads(MinWorkerThread, MinWorkerThread);
+        ThreadPool.SetMaxThreads(MaxWorkerThread, MaxWorkerThread);
+
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
         Console.WriteLine("Generating test data set of size: " + TotalNumberOfData);
@@ -236,7 +229,7 @@ internal class Program
 
         GenerateData();
 
-        const DbType dbType = DbType.MySql;
+        const DbType dbType = DbType.PgSql;
 
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
@@ -250,7 +243,7 @@ internal class Program
         var request = GetRequest(dbType);
         
         request.StartTime = DateTime.Now;
-        await ExecuteTest(request);
+        await ExecuteTestAsync(request);
         request.EndTime = DateTime.Now;
         
         Print(request);
