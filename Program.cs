@@ -45,7 +45,7 @@ internal class Program
 
     private const int TotalNumberOfData = 10000;
     private const int TotalNumberOfRequest = 10000;
-    private const int MaxWorkerThread = TotalNumberOfRequest + 1000;
+    private const int MaxWorkerThread = 30000;
     private const int MinWorkerThread = 100;
     
     private static Person[]? _persons;
@@ -202,6 +202,13 @@ internal class Program
         await Task.WhenAll(tasks);
     }
 
+    private static async Task ExecuteAsync(Request request)
+    {
+        _totalFailed = 0;
+        
+        await ExecuteTestAsync(request);
+    }
+    
     public static Request GetRequest(DbType dbType)
     {
         var request = dbType switch
@@ -229,7 +236,7 @@ internal class Program
 
         GenerateData();
 
-        const DbType dbType = DbType.Redis;
+        const DbType dbType = DbType.PgSql;
 
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
@@ -243,7 +250,7 @@ internal class Program
         var request = GetRequest(dbType);
         
         request.StartTime = DateTime.Now;
-        await ExecuteTestAsync(request);
+        await ExecuteAsync(request);
         request.EndTime = DateTime.Now;
         
         Print(request);
