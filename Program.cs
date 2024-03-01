@@ -229,7 +229,7 @@ internal class Program
 
         GenerateData();
 
-        const DbType dbType = DbType.PgSql;
+        const DbType dbType = DbType.Redis;
 
         Console.WriteLine("*************************************************");
         Console.WriteLine("");
